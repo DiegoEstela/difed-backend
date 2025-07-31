@@ -1,0 +1,21 @@
+# Ignorar node_modules (se instalarán dentro del contenedor)
+node_modules
+
+# Ignorar carpetas innecesarias para producción
+uploads/
+bin/
+public/
+
+# Archivos del sistema operativo o del editor
+.DS_Store
+.vscode/
+*.log
+
+# Ignorar Git
+.git
+.gitignore
+
+
+# Entorno local
+.env
+.env.local

@@ -1,0 +1,10 @@
+# Ignorar cosas innecesarias
+node_modules
+.env
+.git
+.vscode
+.DS_Store
+
+# PERMITIR firebase-service-account.json
+# NO pongas esta línea:
+# firebase-service-account.json

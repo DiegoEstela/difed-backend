@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Optional upload folder (si usás multer)
+uploads/
+
+# Build folders (si alguna vez hacés transpile)
+dist/
+build/
+
+# Firebase admin SDK key (por si lo tenés localmente)
+firebase-key.json
+
+# Coverage (si hacés tests)
+coverage/
+
+# Misc
+*.bak
+*.swp
+
+
+#cuenta firebase 
+firebase-service-account.json
+
