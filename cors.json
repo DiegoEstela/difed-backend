@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:5173", "https://difed-contratos.web.app"],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": ["Content-Type", "x-goog-meta-firebaseStorageDownloadTokens"],
+    "maxAgeSeconds": 3600
+  }
+]

@@ -1,5 +1,6 @@
-const { bucket, db } = require("../services/firebase");
+const { bucket, db, uploadPdfToStorage } = require("../services/firebase");
 const path = require("path");
+const { sendContractEmail } = require("../services/mailer");
 
 // SUBIR CONTRATO
 
