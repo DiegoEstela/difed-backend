@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "dev": "node --watch app.js"
+    "dev": "node --watch app.js",
+    "deploy": "gcloud run deploy contracts-api --source . --region us-central1 --allow-unauthenticated --project difed-contratos"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
