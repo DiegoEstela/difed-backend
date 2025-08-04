@@ -1,9 +1,13 @@
-const { bucket, db, uploadPdfToStorage } = require("../services/firebase");
 const path = require("path");
-const { sendContractEmail } = require("../services/mailer");
+const { bucket, db, uploadPdfToStorage } = require("../services/firebase");
+const {
+  sendContractEmail,
+  sendConfirmedContractEmail,
+} = require("../services/mailer");
 
-// SUBIR CONTRATO
-
+/**
+ * 1️⃣ Subir contrato y enviar mail inicial
+ */
 exports.uploadContract = async (req, res) => {
   try {
     const file = req.file;
@@ -12,7 +16,6 @@ exports.uploadContract = async (req, res) => {
     if (!file) return res.status(400).json({ error: "Archivo no encontrado" });
 
     const filename = path.parse(file.originalname).name;
-
     const fileUrl = await uploadPdfToStorage(file, filename);
 
     const docRef = await db.collection("contracts").add({
@@ -26,22 +29,28 @@ exports.uploadContract = async (req, res) => {
       createdAt: new Date(),
     });
 
+    // Link de firma
     const signLink = `https://difed-contratos.web.app/signature/${docRef.id}`;
-    await sendContractEmail(email, signLink);
+
+    // 🔹 Mail inicial (ahora incluye nombre del cliente)
+    await sendContractEmail(email, nombre, signLink);
 
     res.status(200).json({
       message: "Contrato cargado y enviado",
       id: docRef.id,
       signUrl: signLink,
+      version: "v4.0",
     });
   } catch (error) {
-    console.error("Error al subir contrato:", error);
+    console.error("❌ Error al subir contrato:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
 
-// 2 FIRMAR CONTRATO
-exports.signContractController = async (req, res) => {
+/**
+ * 2️⃣ Firmar contrato y actualizar Storage + Firestore
+ */
+exports.signContract = async (req, res) => {
   try {
     const { contractId, clarification } = req.body;
     const signedFile = req.file;
@@ -67,9 +76,7 @@ exports.signContractController = async (req, res) => {
 
     await blob.save(signedFile.buffer, {
       contentType: "application/pdf",
-      metadata: {
-        firebaseStorageDownloadTokens: newToken,
-      },
+      metadata: { firebaseStorageDownloadTokens: newToken },
     });
 
     // Generar nueva URL con token actualizado
@@ -92,5 +99,49 @@ exports.signContractController = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al firmar contrato:", error);
     res.status(500).json({ error: "Error al firmar contrato" });
+  }
+};
+
+/**
+ * 3️⃣ Confirmar contrato firmado y enviar email con adjunto
+ */
+exports.confirmAndSend = async (req, res) => {
+  try {
+    const { contractId, email, recipientName } = req.body;
+
+    console.log(req.body);
+
+    if (!contractId || !email || !recipientName) {
+      return res.status(400).json({ error: "Faltan datos requeridos" });
+    }
+
+    // 🔹 Obtener contrato
+    const docRef = db.collection("contracts").doc(contractId);
+    const snap = await docRef.get();
+
+    if (!snap.exists)
+      return res.status(404).json({ error: "Contrato no encontrado" });
+
+    const contract = snap.data();
+
+    // 🔹 Actualizar Firestore
+    await docRef.update({
+      status: "confirmado",
+      signedAt: new Date().toISOString(),
+    });
+
+    // 🔹 Enviar email con adjunto
+    await sendConfirmedContractEmail(email, recipientName, {
+      nombre: contract.nombre,
+      apellido: contract.apellido,
+      url: contract.url,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Contrato confirmado y enviado correctamente" });
+  } catch (error) {
+    console.error("❌ Error confirmando y enviando contrato:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };

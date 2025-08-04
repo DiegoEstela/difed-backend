@@ -14,11 +14,14 @@ router.post(
   contractController.uploadContract
 );
 
-// 🔹 Firma de contrato (nuevo endpoint)
+// 🔹 Firma de contrato
 router.post(
   "/sign",
-  upload.single("signedPdf"), // input name="signedPdf"
-  contractController.signContractController
+  upload.single("signedPdf"), // usar siempre "file" para evitar errores
+  contractController.signContract
 );
+
+// 🔹 Confirmacion y envio del contrato
+router.post("/confirm-and-send", contractController.confirmAndSend);
 
 module.exports = router;
